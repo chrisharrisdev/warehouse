@@ -1,7 +1,7 @@
 <template>
   <div>
     <div ref="containerRef"></div>
-    <div class="absolute top-5 left-5 p-3 bg-white rounded shadow">
+    <!-- <div class="absolute top-5 left-5 p-3 bg-white rounded shadow">
       <div class="text-lg font-bold text-center mb-3">货位：3001（整件）</div>
       <div class="flex items-center gap-5 mb-1">
         <div>
@@ -34,84 +34,88 @@
         </div>
        
       </div>          
-    </div>
-    <div class="absolute top-5 right-5 p-3 bg-white rounded shadow" v-if="showNormal">
-      <div class="text-lg font-bold text-center mb-3">货位代码：30010352</div>
+    </div> -->
+    <div class="absolute top-5 right-5 p-3 bg-white rounded shadow" v-if="show">
+      <div class="text-lg font-bold text-center mb-3">货位代码：{{ gd.binCode }}</div>
       <div class="flex items-center gap-5 mb-1">
         <div>
           <label>货品代码：</label>
-          <span class="text-gray-800">15034608</span>
+          <span>{{ gd.goodsCode }}</span>
         </div>
         <div>
           <label>拣货规格：</label>
-          <span class="text-gray-800">1*10</span>
+          <span>1*10</span>
         </div>
         <div>
           <label>单位：</label>
-          <span class="text-gray-800">瓶</span>
+          <span>{{ gd.unit }}</span>
         </div>        
       </div>
       <div class="flex items-center mb-1">
         <label>货品名称：</label>
-        <span class="text-gray-800">味全每日C小青柠复合果汁</span>
+        <span>{{gd.goodsName}}</span>
       </div>
       <div class="flex items-center gap-5 mb-1">
         <div>
           <label>生产日期：</label>
-          <span class="text-gray-800">2024-12-20</span>
+          <span>{{ gd.productDate }}</span>
         </div>
-        <div>
+        <div :class="{'text-red-600': showRed}">
           <label>保质期：</label>
-          <span class="text-gray-800">2025-01-09</span>
+          <span>{{ gd.expireDate }}</span>
         </div>
         <div>
           <label>保质期%：</label>
-          <span class="text-gray-800">76.19%</span>
+          <span>{{ gd.expirePercent }}</span>
         </div>        
       </div> 
       <div class="flex items-center gap-5 mb-1">
         <div>
+          <label>批次号：</label>
+          <span>{{ gd.lotNo }}</span>
+        </div>
+        <div>
+          <label>高低库存：</label>
+          <span class="border p-1 border-gray-400 w-10 inline-block rounded text-center mr-2">20</span>
+          <span class="border p-1 border-gray-400 w-10 inline-block rounded text-center">5</span>
+        </div>
+     
+      </div>      
+      <div class="flex items-center gap-5 mb-1">
+        <div>
+          <label>货主：</label>
+          <span>{{ gd.owner }}</span>
+        </div>
+        <div :class="{'text-red-600': showYellow}">
+          <label>货位总重量：</label>
+          <span>{{ gd.binWeight }}</span>
+        </div>
+     
+      </div>         
+      <div class="flex items-center gap-5 mb-1">
+        <div>
           <label>件数：</label>
-          <span class="text-gray-800">20</span>
+          <span>{{ gd.qtyStr }}</span>
         </div>
         <div>
           <label>数量：</label>
-          <span class="text-gray-800">200</span>
+          <span>{{ gd.qty }}</span>
         </div>      
       </div>            
     </div>
-    <div class="absolute top-5 right-5 p-3 bg-white rounded shadow" v-if="showYellow">
-      <div class="text-lg font-bold text-center mb-3">货位代码：30010316</div>
-      <div class="flex items-center gap-5 mb-1">
-        <div>
-          <label>货品代码：</label>
-          <span class="text-gray-800">11070047</span>
-        </div>   
+    <div class="absolute bottom-5 right-5 bg-white shadow rounded p-3 flex">
+      <div class="flex items-center mr-3 gap-2">
+        <div class="w-10 h-3 bg-green-600"></div>
+        <span>正常</span>
       </div>
-      <div class="flex items-center mb-1">
-        <label>货品名称：</label>
-        <span class="text-gray-800">(西班牙)奥兰小红帽半甜红葡萄酒12度</span>
+      <div class="flex items-center mr-3 gap-2">
+        <div class="w-10 h-3 bg-red-600"></div>
+        <span>超期</span>
       </div>
-      <div class="flex items-center gap-5 mb-1">
-        <div>
-          <label>单品重量：</label>
-          <span class="text-gray-800">750g</span>
-        </div>
-        <div>
-          <label>件数：</label>
-          <span class="text-gray-800">200</span>
-        </div>      
-      </div>   
-      <div class="flex items-center gap-5 mb-1">
-        <div class="text-red-700">
-          <label>货位总重量：</label>
-          <span class="text-red-700">900KG</span>
-        </div>
-        <div>
-          <label>数量：</label>
-          <span class="text-gray-800">1200</span>
-        </div>      
-      </div>     
+      <div class="flex items-center mr-3 gap-2">
+        <div class="w-10 h-3 bg-yellow-600"></div>
+        <span>超重</span>
+      </div>
     </div>
   </div>
 </template>
@@ -138,9 +142,12 @@ import { onMounted, ref } from "vue";
 import { addRack, changeColor, onCargoClick } from '../utils/rack'
 
 
+
 const containerRef = ref<HTMLDivElement>();
-const showNormal = ref(false);
+const show = ref(false);
 const showYellow = ref(false)
+const showRed = ref(false)
+const gd = ref(null)
 
 const scene = new Scene();
 const camera = new PerspectiveCamera(
@@ -242,20 +249,27 @@ const onMouseClick = (event: MouseEvent) => {
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(scene.children);
-  intersects.forEach((intersect) => {
-    if (intersect.object.name.startsWith('货品')) {
-      const cargo = onCargoClick(intersect)
-      if (cargo) {
-        if (cargo.goods === 'green') {
-          showNormal.value = true
-          showYellow.value = false
-        } else if (cargo.goods === 'yellow') {
-          showYellow.value = true
-          showNormal.value = false
-        }
+  
+  if (intersects[0].object.name.startsWith('货品')) {
+    const cargo = onCargoClick(intersects[0])
+    if (cargo) {
+      show.value = true
+      gd.value = cargo.gd
+      if (cargo.goods === 'red') {
+        showRed.value = true
+        showYellow.value = false
+      } else if (cargo.goods === 'yellow') {
+        showYellow.value = true
+        showRed.value = false
+      } else {
+        showRed.value = false
+        showYellow.value = false
       }
     }
-  })
+  } else {
+    show.value = false
+  }
+
 }
 
 window.addEventListener('click', onMouseClick)

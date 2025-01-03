@@ -1,4 +1,5 @@
 import { BoxGeometry, Mesh, MeshLambertMaterial, TextureLoader, Scene, MeshPhongMaterial, Object3DEventMap, Intersection, Object3D } from "three";
+import { goods, redGoods, yellowGoods } from './data'
 const texture = new TextureLoader().load('rack.png')
 const boxTexture = new TextureLoader().load('box.png')
 const rackMat = new MeshLambertMaterial({map: texture})
@@ -91,6 +92,18 @@ export function changeColor() {
 export function onCargoClick(intersect: Intersection<Object3D<Object3DEventMap>>) {
   const cargo = boxList.find((item) => item.name == intersect.object.name)
   if (cargo.goods) {
+    if (cargo.goods === 'red') {
+      const idx = Math.floor((Math.random() * redGoods.length))
+      cargo.gd = redGoods[idx]
+    }
+    if (cargo.goods === 'green') {
+      const idx = Math.floor((Math.random() * goods.length))
+      cargo.gd = goods[idx]
+    }   
+    if (cargo.goods === 'yellow') {
+      const idx = Math.floor((Math.random() * yellowGoods.length))
+      cargo.gd = yellowGoods[idx]
+    }   
     return cargo
   }
 }
